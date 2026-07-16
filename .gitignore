@@ -1,0 +1,34 @@
+# dependencies
+node_modules/
+
+# local environment and secrets
+.env
+.env.*
+!.env.example
+
+# logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# test and build output
+coverage/
+dist/
+/lib/
+*.tsbuildinfo
+
+# editor and OS files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+__mockdef/
