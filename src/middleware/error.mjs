@@ -1,25 +1,28 @@
-import { sendJson } from "../lib/http.mjs";
+import { GatewayError } from "../lib/gateway-error.mjs";
+import { sendGatewayError } from "../lib/http.mjs";
 import { UpstreamRequestError } from "../lib/upstream-client.mjs";
 
 function toErrorPayload(error) {
+  if (error instanceof GatewayError) {
+    return {
+      code: error.code,
+      message: error.message,
+      data: error.data,
+    };
+  }
+
   if (error instanceof UpstreamRequestError) {
     return {
-      statusCode: 502,
-      body: {
-        success: false,
-        errorCode: "UPSTREAM_ERROR",
-        message: "Upstream OpenAPI request failed",
-      },
+      code: "UPSTREAM_ERROR",
+      message: "Upstream OpenAPI request failed",
+      data: {},
     };
   }
 
   return {
-    statusCode: 500,
-    body: {
-      success: false,
-      errorCode: "INTERNAL_ERROR",
-      message: "Internal server error",
-    },
+    code: "INTERNAL_ERROR",
+    message: "Internal server error",
+    data: {},
   };
 }
 
@@ -34,7 +37,7 @@ export function withErrorHandling(handler, logger = console) {
         return;
       }
       const payload = toErrorPayload(error);
-      sendJson(res, payload.statusCode, payload.body);
+      sendGatewayError(res, payload.code, payload.message, payload.data);
     }
   };
 }

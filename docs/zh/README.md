@@ -19,10 +19,12 @@ API Host 必须与同一账号、同一地域的 API Key 配套使用，否则�
 启动前设置百炼 API Host 和主 API Key。所有支持的环境变量见根目录 `.env.example`；demo 不会自动读取 `.env` 文件：
 
 ```bash
-export BAILIAN_API_HOST='llm-<your-workspace-id>.cn-beijing.maas.aliyuncs.com'
+export BAILIAN_API_HOST='your-api-host.maas.aliyuncs.com'
 export DASHSCOPE_API_KEY='sk-...'
 npm start
 ```
+
+所有请求统一使用该 Host 和主 API Key。demo 不感知地域，直接根据 `mode=1/2/3` 选择 Adventure、Directing 或 Acting app。
 
 仅限本地联调或受控环境使用。生产接入时，必须在 `/server-api/*` 外层增加业务鉴权，不要把未加鉴权的 demo 直接暴露给公网或不可信客户端。
 
@@ -58,10 +60,12 @@ http://192.168.1.23:3100/server-api
 验证服务端接口：
 
 ```bash
-curl 'http://127.0.0.1:3000/server-api/worlds?page=1&pageSize=10'
+curl 'http://127.0.0.1:3000/server-api/worlds?page=1&pageSize=10&mode=2'
 ```
 
 除 `POST /server-api/temp-api-key` 的正常响应外，业务响应都透传百炼 app 网关包装，读取 `output.code` 判断业务成败，读取 `output.data` 获取业务数据。
+
+本 demo 自身产生的错误使用相同外层结构，HTTP 状态统一为 `200`，并在 `output.message` 前添加 `[happyoyster-sdk-demo-node]`；百炼响应不做包装或改写。
 
 最短主链路：
 
@@ -100,7 +104,9 @@ ticket 有效期为 30 分钟且只能消费一次。临时 API Key 过期刷新
 
 本 demo 只走百炼 app 网关，和真实三方接入路径保持一致。
 
-`BAILIAN_API_HOST` 可以从百炼控制台 API Key 页的“API Host”获取，例如 `llm-<your-workspace-id>.cn-beijing.maas.aliyuncs.com`。本 demo 内部会补全固定网关路径 `https://{BAILIAN_API_HOST}/api/v2/apps/happyoyster-1.0`。
+`BAILIAN_API_HOST` 必须填写百炼控制台 API Key 页展示的裸 “API Host”。本 demo 只使用固定的正式版 App ID，并根据 mode 选择后按 `https://{BAILIAN_API_HOST}/api/v2/apps/{APP_ID}` 组装地址。
+
+所有场景统一使用 `/server-api/*`、`BAILIAN_API_HOST` 和 `DASHSCOPE_API_KEY`。World 创建和列表从 body 或 query 读取 `mode`，后续请求通过 `X-Happy-Oyster-Mode: 1|2|3` 指定；该分流请求头不会转发给百炼。
 
 管理类和仅服务端接口中的 `DASHSCOPE_API_KEY` 必须使用主 API Key。支持临时 Key 的客户端 SDK 运行态接口应使用临时 Key。如果使用临时 API Key 调用只允许主 API Key 的接口，服务端会返回 `403003 MAIN_API_KEY_REQUIRED`。
 

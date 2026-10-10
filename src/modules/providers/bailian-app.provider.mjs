@@ -24,7 +24,7 @@ function buildHeaders(proxyRequest, config) {
 export async function callBailianApp(proxyRequest, { config, fetchImpl }) {
   // Trailing slash + relative path keep the gateway path when new URL(path, origin) resolves.
   return fetchUpstream({
-    origin: `${config.bailianGatewayBaseUrl}/`,
+    origin: `${config.bailianGatewayBaseUrlsByMode[proxyRequest.mode]}/`,
     path: buildOpenApiPath(proxyRequest.path),
     search: proxyRequest.search,
     method: proxyRequest.method,

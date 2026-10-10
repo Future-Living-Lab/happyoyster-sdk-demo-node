@@ -1,4 +1,4 @@
-import { sendBody, sendJson, textHeaders } from "../../lib/http.mjs";
+import { sendBody, sendGatewayError, textHeaders } from "../../lib/http.mjs";
 import { readRequestBody } from "../../lib/request-body.mjs";
 import { normalizeExpireInSeconds, requestTemporaryApiKey } from "./token.service.mjs";
 
@@ -31,11 +31,7 @@ export async function handleTemporaryApiKey(req, res, context) {
     const body = parseJsonBody(await readRequestBody(req));
     expireInSeconds = normalizeExpireInSeconds(pickExpireInSeconds(context.url, body));
   } catch (error) {
-    sendJson(res, 400, {
-      success: false,
-      errorCode: "PARAM_INVALID",
-      message: error.message,
-    });
+    sendGatewayError(res, "PARAM_INVALID", error.message);
     return;
   }
 

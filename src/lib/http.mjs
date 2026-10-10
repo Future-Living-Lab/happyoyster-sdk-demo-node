@@ -1,3 +1,7 @@
+import { randomUUID } from "node:crypto";
+
+const LOCAL_ERROR_SOURCE = "happyoyster-sdk-demo-node";
+
 export const textHeaders = {
   "content-type": "text/plain; charset=utf-8",
 };
@@ -18,10 +22,21 @@ export function createRequestUrl(req, host, port) {
   return new URL(req.url || "/", base);
 }
 
+export function sendGatewayError(res, code, message, data = {}) {
+  sendJson(res, 200, {
+    request_id: randomUUID(),
+    output: {
+      code,
+      message: `[${LOCAL_ERROR_SOURCE}] ${message}`,
+      data,
+    },
+  });
+}
+
 export function methodNotAllowed(res) {
-  sendBody(res, 405, "Method Not Allowed\n");
+  sendGatewayError(res, "METHOD_NOT_ALLOWED", "Method Not Allowed");
 }
 
 export function notFound(res) {
-  sendBody(res, 404, "Not Found\n");
+  sendGatewayError(res, "NOT_FOUND", "Not Found");
 }

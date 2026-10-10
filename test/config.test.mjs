@@ -3,7 +3,11 @@ import { test } from "node:test";
 import { loadEnv } from "../src/config/env.mjs";
 
 const API_HOST = "llm-example.cn-beijing.maas.aliyuncs.com";
-const GATEWAY_BASE_URL = `https://${API_HOST}/api/v2/apps/happyoyster-1.0`;
+const GATEWAY_BASE_URLS = {
+  1: `https://${API_HOST}/api/v2/apps/happyoyster-1.0-adventure`,
+  2: `https://${API_HOST}/api/v2/apps/happyoyster-1.0-directing`,
+  3: `https://${API_HOST}/api/v2/apps/happyoyster-1.0-acting`,
+};
 
 test("loadEnv requires dashscope api key", () => {
   assert.throws(
@@ -48,13 +52,13 @@ test("loadEnv rejects full bailian api url", () => {
   );
 });
 
-test("loadEnv defaults to local settings", () => {
+test("loadEnv builds mode-specific app URLs", () => {
   const config = loadEnv({
     BAILIAN_API_HOST: API_HOST,
     DASHSCOPE_API_KEY: "sk-test",
   });
 
-  assert.equal(config.bailianGatewayBaseUrl, GATEWAY_BASE_URL);
+  assert.deepEqual(config.bailianGatewayBaseUrlsByMode, GATEWAY_BASE_URLS);
   assert.equal(config.bailianApiOrigin, `https://${API_HOST}`);
   assert.equal(config.dashscopeApiKey, "sk-test");
   assert.equal(config.requestTimeoutMs, 130_000);
@@ -76,7 +80,11 @@ test("loadEnv accepts bailian settings", () => {
   });
 
   assert.equal(config.dashscopeApiKey, "sk-test");
-  assert.equal(config.bailianGatewayBaseUrl, GATEWAY_BASE_URL);
+  assert.deepEqual(config.bailianGatewayBaseUrlsByMode, {
+    1: `https://${API_HOST}/api/v2/apps/happyoyster-1.0-adventure`,
+    2: `https://${API_HOST}/api/v2/apps/happyoyster-1.0-directing`,
+    3: `https://${API_HOST}/api/v2/apps/happyoyster-1.0-acting`,
+  });
   assert.equal(config.bailianApiOrigin, `https://${API_HOST}`);
   assert.equal(config.port, 3100);
   assert.equal(config.requestTimeoutMs, 5_000);

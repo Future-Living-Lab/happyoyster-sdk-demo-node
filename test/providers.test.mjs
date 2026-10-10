@@ -18,6 +18,7 @@ test("bailian provider prefixes app path and strips internal gateway headers", a
     {
       method: "POST",
       path: "/openapi/v1/worlds",
+      mode: 2,
       search: "?dry_run=true",
       headers: {
         "content-type": "application/json",
@@ -29,7 +30,9 @@ test("bailian provider prefixes app path and strips internal gateway headers", a
     },
     {
       config: {
-        bailianGatewayBaseUrl: "https://bailian.example.test/api/v2/apps/happyoyster-1.0",
+        bailianGatewayBaseUrlsByMode: {
+          2: "https://bailian.example.test/api/v2/apps/directing-app",
+        },
         bailianApiOrigin: "https://bailian.example.test",
         dashscopeApiKey: "sk-test",
         requestTimeoutMs: 1_000,
@@ -37,7 +40,7 @@ test("bailian provider prefixes app path and strips internal gateway headers", a
       fetchImpl: async (url, init) => {
         assert.equal(
           String(url),
-          "https://bailian.example.test/api/v2/apps/happyoyster-1.0/openapi/v1/worlds?dry_run=true",
+          "https://bailian.example.test/api/v2/apps/directing-app/openapi/v1/worlds?dry_run=true",
         );
         assert.equal(init.method, "POST");
         assert.equal(init.headers.authorization, "Bearer sk-test");

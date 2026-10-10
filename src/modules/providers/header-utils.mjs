@@ -23,6 +23,7 @@ export function copyForwardableHeaders(headers) {
     if (value === undefined || value === "") continue;
     if (HOP_BY_HOP_HEADERS.has(lowerName)) continue;
     if (isInternalGatewayHeader(lowerName)) continue;
+    if (lowerName === "x-happy-oyster-mode") continue;
     result[lowerName] = Array.isArray(value) ? value.join(", ") : String(value);
   }
 
